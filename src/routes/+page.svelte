@@ -1,161 +1,139 @@
 <script>
+	import { fade, slide } from 'svelte/transition';
+
   import { invoke } from "@tauri-apps/api/core";
+	import { Card } from '$lib/components/ui/card';
+	import { HoverCard } from '$lib/components/ui/hover-card';
+	import { Progress } from '$lib/components/ui/progress';
+	import { Sheet } from '$lib/components/ui/sheet';
+  import { Badge } from '$lib/components/ui/badge'
+  import { Button } from "$lib/components/ui/button";
+  import { Avatar } from "$lib/components/ui/avatar";
+  import Flame from 'lucide-svelte/icons/flame'
+  import User from 'lucide-svelte/icons/user'
 
   let name = $state("");
   let greetMsg = $state("");
+  let cards = $state([]);
+  const recentDecks = [
+      {
+        id: "1",
+        name: "Spanish Basics",
+        description: "Essential Spanish vocabulary",
+        cardCount: 50,
+        progress: 35,
+        language: "Spanish"
+      },
+      {
+        id: "2",
+        name: "French Phrases",
+        description: "Common French expressions",
+        cardCount: 30,
+        progress: 15,
+        language: "French"
+      }
+    ];
 
   async function greet(event) {
     event.preventDefault();
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+
     greetMsg = await invoke("greet", { name });
   }
+
+  async function getCards(event) {
+    event.preventDefault();
+
+    cards = await invoke("flashcards");
+  }
+  let decks = $state([{name:"Deck1", description:"description"}, {name:"Deck2", description:"description"}, {name:"Deck3", description:"description"}])
+
+
+
 </script>
+<main class="flex flex-col">
 
-<main class="container">
-  <div class="perspective-distant">
-  <article class="rotate-x-51 rotate-z-43 transform-3d ...">
-          <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-  </article>
-</div>
-  <h1>Welcome to Tauri + Svelte</h1>
+   <header class="px-4 pt-6 pb-2">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center">
+                <div class="flex flex-col">
+                  <span class="text-lg font-medium">Mavor Polyglotarian</span>
+                </div>
+              </div>
+              <div class="flex items-center">
+                <div class="flex items-center bg-orange-100 px-2 py-1 rounded-full">
+                  <Flame size={16} class="text-orange-500 mr-1" />
+                  <span class="text-sm font-medium text-orange-700">12</span>
+                </div>
+                <div class="h-10 p-2 rounded-full bg-secondary ml-3 flex items-center justify-center text-white font-medium">
+     Urhobo
+                  
+                </div>
+              </div>
+            </div>
+          </header>
+ 
+  <section>
+  <Card class="flex flex-row p-4">
+    <div in:fade>
+    <h1 class="text-2xl font-bold">Welcome Polyglotarian</h1>
+      <p class="mt-4 text-primary">Keep up the great work</p>
+    </div>    
+              <div in:slide class="flex flex-col justify-end">
+                  <div class="w-36 h-36 rounded-full border-4 border-white/30 flex items-center justify-center">
+                    <span class="text-xl font-bold">15/25</span>
+                  </div>
+                  <p class="mt-2">Today's goal</p>
+                  <button class="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-medium shadow-sm hover:bg-blue-50 w-full max-w-xs">
+                    Continue Learning
+                  </button>
+                </div>
+      
+    
+  </Card>
+</section>
 
-  <div class="row">
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-    </a>
-    <a href="https://tauri.app" target="_blank">
-      <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-    </a>
-    <a href="https://kit.svelte.dev" target="_blank">
-      <img src="/svelte.svg" class="logo svelte-kit" alt="SvelteKit Logo" />
-    </a>
+  
+
+<div class="space-y-4">
+  <h2 class="text-xl font-semibold">Recent Decks</h2>
+  <div class="flex flex-row gap-4">
+    {#each recentDecks as deck}
+      <a 
+        href="/decks/{deck.id}"
+        class="p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors"
+      >
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <h3 class="font-semibold">{deck.name}</h3>
+            <p class="text-sm text-muted-foreground">{deck.description}</p>
+          </div>
+          <span class="text-sm font-medium bg-primary/10 text-primary px-2 py-1 rounded">
+            {deck.language}
+          </span>
+        </div>
+        
+        <div class="space-y-2">
+          <div class="flex justify-between text-sm">
+            <span>{deck.cardCount} cards</span>
+            <span>{deck.progress}% complete</span>
+          </div>
+          <div class="w-full bg-secondary rounded-full h-2">
+            <div 
+              class="bg-primary rounded-full h-2" 
+              style="width: {deck.progress}%"
+            ></div>
+          </div>
+        </div>
+      </a>
+    {/each}
   </div>
-  <p>Click on the Tauri, Vite, and SvelteKit logos to learn more.</p>
+</div>
 
-  <form class="row" onsubmit={greet}>
+
+  <form class="row" onsubmit={getCards}>
     <input id="greet-input" placeholder="Enter a name..." bind:value={name} />
     <button type="submit">Greet</button>
   </form>
   <p>{greetMsg}</p>
+  <p>{cards}</p>
 </main>
-
-<style>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.svelte-kit:hover {
-  filter: drop-shadow(0 0 2em #ff3e00);
-}
-
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
-  outline: none;
-}
-
-#greet-input {
-  margin-right: 5px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
-}
-
-</style>
